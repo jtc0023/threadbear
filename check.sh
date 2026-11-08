@@ -51,7 +51,14 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# THREADBEAR_NODE wins; else Mike's nvm Node 24, else a Node 24 on PATH.
 NODE="${THREADBEAR_NODE:-$HOME/.nvm/versions/node/v24.22.1/bin/node}"
+if [ -z "${THREADBEAR_NODE:-}" ] && [ ! -x "$NODE" ]; then
+  PATH_NODE="$(command -v node 2>/dev/null || true)"
+  if [ -n "$PATH_NODE" ] && [ "$("$PATH_NODE" -p 'process.versions.node.startsWith("24.")' 2>/dev/null)" = true ]; then
+    NODE="$PATH_NODE"
+  fi
+fi
 QUICK=0
 APP_ONLY=0
 ALL=0
